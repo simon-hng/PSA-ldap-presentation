@@ -570,6 +570,9 @@ ldapsearch -x -h vm09.psa-team09.in.tum.de -b dc=team09,dc=psa,dc=in,dc=tum,dc=d
 # Erzeugen eines X.509 Zertifikats/ Hinzufügen zu LDAP-Einträgen
 
 TODO
+```bash
+usercertificate;binary:< file:///root/workspace/csv2ldif/testdata/outcert.der
+```
 
 ---
 
