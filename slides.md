@@ -382,22 +382,20 @@ head -n 1 testdata/benutzerdaten.csv
 
 ---
 
-```python {all|9|17-31}
+```python {all|6|15-35}
 class LdifEntry:
-    matrNr = 0
-    uidNum = '' 
-    firstName = ''
-    lastName = ''
+    uidNum = ''
     attributes = {}
     userCertificatePath = ''
 
-    def __init__(self, matrNr, uidNum, firstName, lastName, attrNames, row):
-        # Initialisations...
-        self.userCertificatePath = CERTIFICATES + matrNr + ".der"
+    def __init__(self, uidNum, attrNames, row):
+        self.uidNum = uidNum
 
         # Replace Name attribute name with Nachname
         attrNames = ['Nachname' if item == 'Name' else item for item in attrNames]
         self.attributes = dict(zip(attrNames, row))
+
+        self.userCertificatePath = CERTIFICATES + self.attributes["Matrikelnummer"] + ".der"
 
     def __str__(self):
         entry = textwrap.dedent("""\
@@ -413,7 +411,13 @@ class LdifEntry:
             sn: %s
             homeDirectory: /home/%s
             usercertificate;binary:<file://%s
-        """%(self.matrNr, self.matrNr, self.uidNum,...))
+        """%(   self.attributes["Matrikelnummer"],
+                self.attributes["Matrikelnummer"],
+                self.uidNum,
+                self.attributes["Vorname"],
+                self.attributes["Nachname"],
+                self.attributes["Nachname"],
+                self.userCertificatePath))
 
         for attrName, value in self.attributes.items():
             entry = entry + attrName + ': ' + value + '\n'
@@ -423,7 +427,7 @@ class LdifEntry:
 
 ---
 
-```python {all|1-8|9-15|16-21|23-37}
+```python {all|1-8|9-15|16-19|20-31}
 def main():
     with open(CSV_FILE, newline='', encoding='latin-1') as f:
         reader = csv.reader(f)
@@ -441,23 +445,17 @@ def main():
 
             if (firstRow):
                 attributes = row
-                matrNrIndex = row.index("Matrikelnummer")
-                firstNameIndex = row.index("Vorname")
-                lastNameIndex = row.index("Name")
                 firstRow = False
 
             else:
                 entry = LdifEntry(
-                            row[matrNrIndex], 
                             uidNum,
-                            row[firstNameIndex], 
-                            row[lastNameIndex], 
                             attributes,
                             row)
 
                 uidNum = uidNum + 1
 
-                fileName = LDAP_DATA_FOLDER + getattr(entry, 'lastName') + '.ldif'
+                fileName = LDAP_DATA_FOLDER + getattr(entry, 'attributes')["Nachname"] + '.ldif'
 
                 file = open(fileName, 'x');
                 file.write(str(entry))
