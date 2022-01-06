@@ -312,15 +312,7 @@ SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{32} )
 
 #
 
-#
-
-#
-
 # More Attributes here
-
-#
-
-#
 
 #
 
@@ -333,14 +325,14 @@ MAY ( Vorname $ Geschlecht $ Geburtsdatum $
 Geburtsort $ Nationalitaet $ Strasse $ PLZ $ Ort $ Telefon ) ) # attributes that can be filled
 ```
 
-- Sobald diese new.schema Datei fertig erzeugt man sich ein neues tmp Directory und ein neues tmp.conf file:
+Sobald diese new.schema Datei fertig erzeugt man sich ein neues tmp Directory und ein neues tmp.conf file:
 
 ```bash
 mkdir tmp
 touch tmp.conf
 ```
 
-- Inhalt der tmp.conf Datei:
+Inhalt der tmp.conf Datei:
 
 ```bash
 include /etc/ldap/schema/core.schema
@@ -350,20 +342,20 @@ include /etc/ldap/schema/inetorgperson.schema
 include $path to new.schema file$
 ```
 
-- Mittels folgendem Befehl wird dann eine Test Config Umgebung des LDAP Servers erzeugt, was unsere new.schema Datei in ein ldif Format umbaut was der LDAP Server lesen kann:
+Mittels folgendem Befehl wird dann eine Test Config Umgebung des LDAP Servers erzeugt, was unsere new.schema Datei in ein ldif Format umbaut was der LDAP Server lesen kann:
 
 ```bash
 slaptest -f /$path$/test.conf -F /$path$/schema/tmp
 ```
 
-- Anschließend kann man diese Datei aus dem tmp Ordner zum Verzeichnis des LDAP Servers kopieren und den Server neustarten. Dann steht das Schema zur Verfügung.
+Anschließend kann man diese Datei aus dem tmp Ordner zum Verzeichnis des LDAP Servers kopieren und den Server neustarten. Dann steht das Schema zur Verfügung.
 
 ```bash
 cp /$path$/tmp/cn=config/cn=schema/cn={4}new.ldif /etc/ldap/slapd.d/cn=config/cn=schema/
 systemctl restart slapd.service
 ```
 
-- Anmerkung: Dieses so erzeugte Schema ist zum Zweck der im Aufgabenblatt geforderten einfügen der CSV erzeugt worden und ist deshalb kein eigenständiges Strukturelles Schema weil wir wie man oben gesehen hat (LDAP-Daten hinzufügen - OU psaou) dieses Schema in Kombination mit anderen strukturellen Schemata (inetOrgPerson,posixAccount,shadowAccount) verwenden. Es dient allein zu Organisation der Daten. Das liegt am Eintrag AUXILARY im .schema file. Bei diesem Eintrag gibt es noch mehr Optionen was aber für unsere Zweck nicht notwendig wahr.
+> Anmerkung: Dieses so erzeugte Schema ist zum Zweck der im Aufgabenblatt geforderten einfügen der CSV erzeugt worden und ist deshalb kein eigenständiges Strukturelles Schema weil wir wie man oben gesehen hat (LDAP-Daten hinzufügen - OU psaou) dieses Schema in Kombination mit anderen strukturellen Schemata (inetOrgPerson,posixAccount,shadowAccount) verwenden. Es dient allein zu Organisation der Daten. Das liegt am Eintrag AUXILARY im .schema file. Bei diesem Eintrag gibt es noch mehr Optionen was aber für unsere Zweck nicht notwendig wahr.
 
 ---
 
@@ -373,7 +365,7 @@ systemctl restart slapd.service
 2. Ausschreiben im richtigen Format in eine `ldif` datei
 3. X.509 Zertifikat hinzufügen
 
-Zuerst schauen wir uns das Format der CSV Datei an:
+Untersuchen der gegebenen Attribute in der CSV-Datei:
 
 ```bash
 head -n 1 testdata/benutzerdaten.csv
@@ -382,7 +374,11 @@ head -n 1 testdata/benutzerdaten.csv
 
 ---
 
-```python {all|6|15-35}
+## LdifEntry Klasse
+
+Konstruktor und attribute
+
+```python {all|2,6,7|6,3,9-11|4,13}
 class LdifEntry:
     uidNum = ''
     attributes = {}
@@ -397,6 +393,13 @@ class LdifEntry:
 
         self.userCertificatePath = CERTIFICATES + self.attributes["Matrikelnummer"] + ".der"
 
+```
+
+---
+
+## LdifEntry Klasse
+
+```python {all|3-14|15-18|20-21}
     def __str__(self):
         entry = textwrap.dedent("""\
             dn: Matrikelnummer=%s,ou=psaou,dc=team09,dc=psa,dc=in,dc=tum,dc=de
@@ -411,13 +414,10 @@ class LdifEntry:
             sn: %s
             homeDirectory: /home/%s
             usercertificate;binary:<file://%s
-        """%(   self.attributes["Matrikelnummer"],
-                self.attributes["Matrikelnummer"],
-                self.uidNum,
-                self.attributes["Vorname"],
-                self.attributes["Nachname"],
-                self.attributes["Nachname"],
-                self.userCertificatePath))
+        """%( self.attributes["Matrikelnummer"],
+              self.attributes["Matrikelnummer"],
+              ...
+              self.userCertificatePath))
 
         for attrName, value in self.attributes.items():
             entry = entry + attrName + ': ' + value + '\n'
@@ -427,36 +427,48 @@ class LdifEntry:
 
 ---
 
-```python {all|1-8|9-15|16-19|20-31}
+## Umlaute ersetzen
+
+row ist eine Zeile in der CSV-datei z.B:
+
+```csv
+Rimmelspacher,Michael,w,10.04.88,Wasserburg,TH,Neufahrner Str. 7,82031,Muenchen,02283-67794984,1574819974
+```
+
+```python
+def replaceUmlauts(row):
+    return list(map(lambda s: s.replace(u'ä', 'ae')
+                               .replace(u'ö', 'oe')
+                               .replace(u'ü', 'ue')
+                               .replace(u'ß', 'ss')
+                               , row))
+```
+
+---
+
+## Main
+
+CSV parsen
+
+```python {all|1-7|8|10-12|14-20}
 def main():
     with open(CSV_FILE, newline='', encoding='latin-1') as f:
         reader = csv.reader(f)
-
         uidNum = 8000
         firstRow = True
 
         for row in reader:
-            # Replace german umlaute
-            row = list(map(lambda s: s.replace(u'ä', 'ae')
-                                      .replace(u'ö', 'oe')
-                                      .replace(u'ü', 'ue')
-                                      .replace(u'ß', 'ss')
-                                      , row))
+            row = replaceUmlauts(row)
 
             if (firstRow):
                 attributes = row
                 firstRow = False
 
             else:
-                entry = LdifEntry(
-                            uidNum,
-                            attributes,
-                            row)
-
+                entry = LdifEntry(uidNum, attributes, row)
                 uidNum = uidNum + 1
 
                 fileName = LDAP_DATA_FOLDER + getattr(entry, 'attributes')["Nachname"] + '.ldif'
-
                 file = open(fileName, 'x');
                 file.write(str(entry))
 ```
