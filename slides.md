@@ -141,8 +141,7 @@ Verify return code: 0 (ok)
 
 ## Daten hinzufügen
 
-Um Dateneinträge unserem LDAP Server hinzuzufügen bzw. diese zu ändern werden folgende Befehle benötigt,
-welche wir alle aus einem sogenannten ldif File lesen:
+Befehle
 
 ```bash
 ldapadd -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f file.ldif -W
@@ -153,14 +152,14 @@ ldapmodify -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f file.ldif -W
 layout: intro
 ---
 
-# Object Units
+# Organizational Units
 TODO: Kurze erklärung evtl.
 
 ---
 
 ## OU allgemein anlegen
 
-Object Units allgemein anlegen
+Organizational Units allgemein anlegen
 
 ```bash {all|6-9|6|7-8|9}
 dn: ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de #distinguished_name eintrag
@@ -211,13 +210,13 @@ userPassword: XXXXXXX
 
 ## OU groups
 
-Gruppe für alle Groups die mit Teams aus dem Praktikum assoziiert werden.
+Gruppe für alle Nutzer die mit Teams aus dem Praktikum assoziiert werden.
 
 ```bash
-dn: ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de
-objectclass: top
-objectclass: organizationalUnit
-ou: users
+dn: cn=team09,ou=groups,dc=team09,dc=psa,dc=in,dc=tum,dc=de
+objectClass: top
+objectClass: posixGroup
+gidNumber: 1090
 ```
 
 ---
@@ -496,18 +495,17 @@ def main():
 layout: intro
 ---
 
-## DAP - Zugriffsrechte
-
-Anforderung: Ein anonymous bind darf nur die Benutzerkennung erhalten
+# LDAP - Zugriffsrechte
 
 ---
 
-## DAP - Zugriffsrechte
+## LDAP - Zugriffsrechte
 
+- Anforderung: Ein anonymous bind darf nur die Benutzerkennung erhalten
 - Der OpenLDAP Server auf Ubuntu wird durch den cn=config tree definiert
 - Anzeigen der aktuellen Zugriffsrechte mit einer ldapsearch auf das **olcAccess** Attribut:
 
-```bash{all|11-14}
+```bash{all|1|11-14}
 root@vmpsateam09-09:~# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={1}mdb'
 SASL/EXTERNAL authentication started
 SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
@@ -535,10 +533,10 @@ olcDbMaxSize: 1073741824
 ```
 
 ---
+## LDAP - Zugriffsrechte
+- Erzeugen einer ldif Datei um Zugriffsrechte anzupassen
 
--Erzeugen einer ldif Datei um Zugriffsrechte anzupassen
-
-```bash{all|2,3}
+```bash{all|2,3|all}
 dn: olcDatabase={1}mdb,cn=config
 changetype: modify
 replace: olcAccess
@@ -563,7 +561,7 @@ by \* none
 ```
 
 ---
-
+## LDAP - Zugriffsrechte
 - Diese ldif Datei kann mittels folgendem Befehl eingespielt werden:
 
 ```bash
@@ -585,33 +583,111 @@ layout: intro
 # Erzeugen eines X.509 Zertifikats
 
 ---
-
-TODO
-
+## Erzeugen eines X.509 Zertifikats
 ```bash
-usercertificate;binary:< file:///root/workspace/csv2ldif/testdata/outcert.der
+openssl genrsa 2048 > private.key
+openssl req -new -x509 -nodes -sha1 -days 1000 -key private.key > output.cer
 ```
+## Konvertieren
+```bash
+openssl x509 -outform DER -in output.cer -out binary.der
+```
+## ldif
+- Nutzen des Attributs **usercertificate** der objectClass **inetOrgPerson**
+```bash
+usercertificate;binary:< file:///$PATH_TO_BINARY_FILE$/outcert.der
+```
+---
+layout: intro
+---
+# LDAP - Hinzufügen aller ldif Dateien
+Zusammenführung der einzelnen Schritte
 
 ---
-# LDAP - Hinzufügen aller ldif Datein
-
+## LDAP - Hinzufügen aller ldif Dateien
+1. Erzeugen von Privaten Schlüsseln und damit erzeugen von X.509 Zertifikaten in binary Form für jede Kennung
+2. Erzeugen der einzelnen ldif Dateien für jede Kennung
+3. Hinzufügen zum LDAP-Server
 ---
+## LDAP - Hinzufügen aller ldif Dateien
+```bash
+BASE_DIR=/root/workspace/csv2ldif
+INPUT_DIR=$BASE_DIR/testdata
+CSV_INPUT=$INPUT_DIR/benutzerdaten.csv2
+BIN_DIR=$INPUT_DIR/public
+KEY_DIR=$INPUT_DIR/private
+PWD_FILE=$BASE_DIR/.pw
+
+echo Cleanup
+
+/bin/rm -f $BIN_DIR/*.der
+/bin/rm -f $BIN_DIR/*.cer
+/bin/rm -f $INPUT_DIR/input.*
+/bin/rm -f $KEY_DIR/*.key
+/bin/rm -f $BASE_DIR/ldap_data/*.ldif
+```
+--- 
+## LDAP - Hinzufügen aller ldif Dateien
+```bash
+echo Create Certifcates
+
+cd $INPUT_DIR
+export IFS=,; cat $CSV_INPUT |  while read na vn x1 x2 x3 co x5 x6 ci x7 x8; do 
+   [ $co == "D" ] && co=DE; 
+   openssl genrsa 2048 > $KEY_DIR/$x8.key  
+   printf "%s\n-\n%s\n-\n-\n%s %s\n%s.%s@web.de\n"  "DE" "$ci" "$vn" "$na" "$vn" "$na" > $INPUT_DIR/input.$x8; 
+   cat input.$x8 |  openssl req -new -x509 -nodes -sha1 -days 1000 -key $KEY_DIR/$x8.key > $BIN_DIR/$x8.cer; 
+   openssl x509 -outform DER -in $BIN_DIR/$x8.cer -out $BIN_DIR/$x8.der ;
+done
+```
+--- 
+## LDAP - Hinzufügen aller ldif Dateien
+```bash
+echo Create ldifs
+
+cd $BASE_DIR
+./csv2ldif
+```
+--- 
+## LDAP - Hinzufügen aller ldif Dateien
+```bash{all|6}
+echo Import ldifs
+
+cd $BASE_DIR/ldap_data
+for i in *.ldif; do 
+  echo -n "-- add $i "
+  ldapadd -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f $i -y $PWD_FILE > /dev/null 2>&1
+  ret=$?
+  [ $ret -eq 0 ] && echo "ok"
+  [ $ret -ne 0 ] && echo "error (ret=$ret)"
+done
+```
+---
+layout: intro
+---
+
 # SSSD - Installation/Konfiguration
 
-Der System Security Services Daemon ist eine Sammlung von Diensten, die zur Authentifizierung und Sicherheit dienen. In unserem Fall übernimmt der sssd die Authentifizierung durch unseren LDAP Server.
+Der System Security Services Daemon ist eine Sammlung von Diensten, die zur Authentifizierung und Sicherheit dienen.
 
+---
+## SSSD - Installation/Konfiguration
 Installation:
 
 ```bash
 sudo apt install sssd-ldap ldap-utils
 ```
 
-Bei dieser Installation werden folgende wichtige Dateien angepasst damit der sssd Service bei der Authentifizierung eines Nutzers auch befragt wird TODO bsp pam_sss:
+Änderungen bei der Installation
 
 ```bash
 /etc/pam.d/\*
 /etc/nswitch.conf
 ```
+
+---
+## SSSD - Installation/Konfiguration
+Anlegen einer `/etc/sssd/sssd.conf`
 
 ```bash{all|6,7|8,9|10-14}
 [sssd]
@@ -630,6 +706,8 @@ ldap_default_authtok_type = password                    # art der authentifikati
 ldap_default_authtok = XXXXXXXXX                        # passwort für ldap-server account
 ldap_tls_reqcert = allow
 ```
+--- 
+## SSSD - Installation/Konfiguration
 
 - Starten des sssd Services:
 
@@ -650,7 +728,7 @@ root@vmpsateam09-04:~# ldapwhoami -x -ZZ -h vmpsateam09-09.psa-team09.in.tum.de
 anonymous
 ```
 
-- LÖschen der lokalen Nutzer Einträge
+- Löschen der lokalen Nutzer Einträge
 
 ```bash
 userdel nutzerkennung # ohne löschen des homeverzeichnisses
@@ -679,7 +757,7 @@ debug kurz: /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /
 debug lang : /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 1023
 ```
 
--sssd Cache leeren
+- sssd Cache leeren
 ```bash
 sss_cache -E 
 systemctl restart sssd.service
