@@ -1,5 +1,6 @@
 ---
 theme: default
+layout: cover
 ---
 
 # PSA-Praktikum Blatt 8
@@ -12,6 +13,8 @@ LDAP
   </span>
 </div>
 
+---
+layout: intro
 ---
 
 # Installation
@@ -28,11 +31,7 @@ Mittels des folgenden Befehls kann man dann seine Base Domäne/ Präfix für den
 sudo dpkg-reconfigure slapd
 ```
 
----
-
-# TLS
-
-Nutzen des certtools für linux. Also Zuerst das certtool installieren
+Für TLS nutzen wir das certtools für linux
 
 ```bash
 sudo apt install gnutls-bin ssl-cert
@@ -101,47 +100,21 @@ verify return:1
 
 ---
 
+
 Certificate chain
 0 s:CN = vmpsateam09-09.psa-team09.in.tum.de, O = PSA TUM
 i:CN = PSA TUM
 1 s:CN = PSA TUM
 i:CN = PSA TUM
+```
 
 ---
 
-Server certificate
------BEGIN CERTIFICATE-----
-MIIEVjCCAj6gAwIBAgIUQUhzMmOO4918rt8WrKSw0sQfbaIwDQYJKoZIhvcNAQEM
-BQAwEjEQMA4GA1UEAxMHUFNBIFRVTTAeFw0yMTEyMjAyMDI2MzZaFw0yMjEyMjAy
-MDI2MzZaMEAxLDAqBgNVBAMTI3ZtcHNhdGVhbTA5LTA5LnBzYS10ZWFtMDkuaW4u
-dHVtLmRlMRAwDgYDVQQKEwdQU0EgVFVNMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
-MIIBCgKCAQEAv19oGTfo/dgRRgYyBt/P6jIg35q56X5Tz8akQq9K5uxYhfyN5WnE
-Yjekcr4V/XECOnyA4tm7Lu9G57XBf3v9W28WpQgiLwKIza6gNlxH9G58jcNBKpEM
-ojlLwgeLJ16NVzfDQVe3MRKzJVoZU+2E+ANHH4NWctTaQmi7ySOOZfInjC9Piv69
-AgKXM09J6D1/IY6FGEQt/TtPo2JMkkYDmvmW2qCuQkYhRPske2GzsFIgg500W0+h
-VnpkVcYuXvE9VdS1PcgBx0Apx80PXRo8DzMJRRL+x89yPDby5TWVHRBQ3ZcHpbE0
-31yk+m4oRJi8aIKbLr+ccIggNZXtm5NlaQIDAQABo3YwdDAMBgNVHRMBAf8EAjAA
-MBMGA1UdJQQMMAoGCCsGAQUFBwMBMA8GA1UdDwEB/wQFAwMHoAAwHQYDVR0OBBYE
-FGChF0CM2rm3I3v1iUITWCi0s45OMB8GA1UdIwQYMBaAFA2QC/AaKpnLRIFSCWiU
-CRDqdg1CMA0GCSqGSIb3DQEBDAUAA4ICAQAOa2yduhCGLTvFLRo7aPNu9rw+TZuB
-teBgzV0opbuYE/XgQfH/xLTB3yXtk4SWIGI9EMNKTyKqKc2kGQXM53q0i+l9cYj3
-t8RXn94Wyo8/et3gIxN+ODsfBFJXCZE0EL6wvM+udoRUF/1q0yTApYxvWSmgMFkX
-jLE5c2hcy83/xW4vnJ+p52HmRImVUExzf9DlWBeAcIeqg099tFpxPncSK8RJiTOd
-AuX5mBtUko5A1/X8iLGPMvf7GzFsl5OE53FVMK7LseoPGzdJ6uqjt545LluHAEyq
-d5pZTkjbIc7Q81MahwWP8GVmv38cIUmedq3O0ApYJ7iw6RVZDRWB2hOhII+wAln2
-WN8it8SDY3N0r2FLNhd4BYPHME/X5y6iMvpgjfZRHop1Gqv9i7lETiHvshuEBwsq
-cRJdcc8VqMCDv+EkRc1dPUP+wqFb7M5KSYmLkjLrMF1NhFsqLdkurSXjrJzXxEoG
-NGcB+pcvoMRj9ycT7T4gPP/wUhoExLlnA/o8vy8pABwgT74fA7GiIjaqBhQkTD3a
-W9IvaIPR/GRO/EUFNwO9FDWKAYtBnn0XgECE0jg6GpA5+cOqQvE/vQTn3oc8SHgD
-E/iAJWxOWbQ4b5+9hFlafUDs06JJubYLEZTyV4KsFFUEiT8d421n1vRHuUWmpNRe
-bVlZ5y+dCk3BZQ==
------END CERTIFICATE-----
-subject=CN = vmpsateam09-09.psa-team09.in.tum.de, O = PSA TUM
+## Testen
 
-issuer=CN = PSA TUM
+output ff.
 
----
-
+```bash {all|21,10}
 No client certificate CA names sent
 Peer signing digest: SHA256
 Peer signature type: RSA-PSS
@@ -166,7 +139,7 @@ Verify return code: 0 (ok)
 
 ---
 
-# Daten hinzufügen
+## Daten hinzufügen
 
 Um Dateneinträge unserem LDAP Server hinzuzufügen bzw. diese zu ändern werden folgende Befehle benötigt,
 welche wir alle aus einem sogenannten ldif File lesen:
@@ -177,10 +150,19 @@ ldapmodify -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f file.ldif -W
 ```
 
 ---
+layout: intro
+---
 
-## Object Units (OU) allgemein anlegen
+# Object Units
+TODO: Kurze erklärung evtl.
 
-```bash
+---
+
+## OU allgemein anlegen
+
+Object Units allgemein anlegen
+
+```bash {all|6-9|6|7-8|9}
 dn: ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de #distinguished_name eintrag
 objectclass: top #classes with attributes
 objectclass: organizationalUnit #classes with attributes
@@ -257,7 +239,7 @@ userPassword: XXXXXXX
 
 ## OU psaou
 
-Gruppe für alle Nutzerkennung die wir aus dem CSV File eingelesen. Hier wird auch unser selbsterzeugtes Schema psaPerson genutzt (mehr dazu unter LDAP-Eigenes Schema erzeugen)
+Gruppe für alle Nutzerkennung die wir aus dem CSV File eingelesen. Hier wird auch unser selbsterzeugtes Schema psaPerson genutzt.
 
 ```bash
 dn: Matrikelnummer=1622888953,ou=psaou,dc=team09,dc=psa,dc=in,dc=tum,dc=de
@@ -271,6 +253,16 @@ uidNumber: 8021
 cn: Clarissa
 sn: Attenberger
 homeDirectory: /home/Attenberger
+
+```
+---
+
+## OU psaou
+
+Gruppe für alle Nutzerkennung die wir aus dem CSV File eingelesen. Hier wird auch unser selbsterzeugtes Schema psaPerson genutzt.
+
+```bash{all|1|2-11}
+usercertificate;binary:<file:///root/workspace/csv2ldif/testdata/public/1622888953.der
 Nachname: Attenberger
 Vorname: Clarissa
 Geschlecht: m
@@ -282,27 +274,43 @@ PLZ: 53604
 Ort: Muenchen DE
 Telefon: 0455/67742938
 Matrikelnummer: 1622888953
+
 ```
 
 ---
+layout: intro
+---
 
-# Eigenes Schema erzeugen
+# LDAP Schema
 
-Um die Daten aus der CSV Datei übersichtlich und mit den angegeben Attributen im LDAP Server abspeichern zu können, haben wir ein eigenes Schema psaPerson angelegt. Ein Schema entspricht konzeptionell einer Objekt Klasse mit Attributen. Man legt fest welche Attribute welchen Typ haben und welche Attribute beim Nutzen des Schemas angegeben werden müssen und welche Attribute optional sind. Wir haben den Nachnamen und die Matrikelnummer als notwendige Attribute festgelegt, wobei die Matrikelnummer den Unique Identifier für den Eintrag einer psaPerson angibt.
+1. Custom Schema: psaPerson
+1. Attribute die den Einträgen im CSV File entsprechen
 
-Als erstes legt man ein new.schema Datei an, die eine spezielle Syntax hat und in unserem Fall wie folgt aufgebaut ist:
+---
+
+## LDAP Schema
+
+Als erstes legt man eine `new.schema` Datei an, die eine spezielle Syntax hat und in unserem Fall wie folgt aufgebaut ist:
 
 ```bash
 objectidentifier psaSchema 1.3.6.1.4.1.A.B # Unique ObjectIdentifier OID for the scheme --> A and B arbitary numbers for unique idntification
 objectidentifier psaAttrs psaSchema:X # OID for all Attributes --> OID from scheme + ".X"
 objectidentifier psaOCs psaSchema:Y # OID for all ObjectClass definitions --> OID from scheme + ".Y"
 
-attributetype ( psaAttrs:1 # new attributetype with OID psaAttrs + ".1"
-NAME 'Nachname' # new name for the attributetype
-DESC 'PSA Nachname Identifier' # new description for the attributetype
-EQUALITY caseIgnoreMatch # behavior for rules with equal name --> here: ignore
-SUBSTR caseIgnoreSubstringsMatch # behavior for rules with similar name(substring) --> here: ignore
-SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{32} ) # attribute Type: String{field with 32 characters}
+attributetype ( psaAttrs:1                  # new attributetype with OID psaAttrs + ".1"
+NAME 'Nachname'                             # new name for the attributetype
+DESC 'PSA Nachname Identifier'              # new description for the attributetype
+EQUALITY caseIgnoreMatch                    # behavior for rules with equal name --> here: ignore
+SUBSTR caseIgnoreSubstringsMatch            # behavior for rules with similar name(substring) --> here: ignore
+SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{32} )  # attribute Type: String{field with 32 characters}
+
+```
+
+---
+
+## LDAP Schema
+
+```bash{all|15|18,19}
 attributetype ( psaAttrs:2
 NAME 'Vorname'
 DESC 'PSA Vorname Identifier'
@@ -316,23 +324,21 @@ SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{32} )
 
 #
 
-objectClass ( psaOCs:1 # new objectClass with OID psaOCs + ".1"
-NAME 'psaPerson' # new name for the objectClass
-DESC 'Describe a PSA Person' # new description for the objectClass
-SUP ( top ) AUXILIARY # Superior objectClass (here:top) ; type of objectClass here(AUXILIARY)
-MUST ( Matrikelnummer $ Name ) # attributes that have to be filled
+## LDAP Schema
+objectClass ( psaOCs:1                               # new objectClass with OID psaOCs + ".1"
+NAME 'psaPerson'                                     # new name for the objectClass
+DESC 'Describe a PSA Person'                         # new description for the objectClass
+SUP ( top ) AUXILIARY                                # Superior objectClass (here:top) ; type of objectClass here(AUXILIARY)
+MUST ( Matrikelnummer $ Name )                       # attributes that have to be filled
 MAY ( Vorname $ Geschlecht $ Geburtsdatum $
 Geburtsort $ Nationalitaet $ Strasse $ PLZ $ Ort $ Telefon ) ) # attributes that can be filled
 ```
 
-Sobald diese new.schema Datei fertig erzeugt man sich ein neues tmp Directory und ein neues tmp.conf file:
+---
 
-```bash
-mkdir tmp
-touch tmp.conf
-```
+## LDAP Schema
 
-Inhalt der tmp.conf Datei:
+Erzeugen einer `tmp.conf` Datei:
 
 ```bash
 include /etc/ldap/schema/core.schema
@@ -342,21 +348,21 @@ include /etc/ldap/schema/inetorgperson.schema
 include $path to new.schema file$
 ```
 
-Mittels folgendem Befehl wird dann eine Test Config Umgebung des LDAP Servers erzeugt, was unsere new.schema Datei in ein ldif Format umbaut was der LDAP Server lesen kann:
+Erzeugen einer Test Config Umgebung des LDAP Servers
 
 ```bash
 slaptest -f /$path$/test.conf -F /$path$/schema/tmp
 ```
 
-Anschließend kann man diese Datei aus dem tmp Ordner zum Verzeichnis des LDAP Servers kopieren und den Server neustarten. Dann steht das Schema zur Verfügung.
+Config Datei in das Produktionsverzeichnis kopieren und Server neustarten
 
 ```bash
 cp /$path$/tmp/cn=config/cn=schema/cn={4}new.ldif /etc/ldap/slapd.d/cn=config/cn=schema/
 systemctl restart slapd.service
 ```
 
-> Anmerkung: Dieses so erzeugte Schema ist zum Zweck der im Aufgabenblatt geforderten einfügen der CSV erzeugt worden und ist deshalb kein eigenständiges Strukturelles Schema weil wir wie man oben gesehen hat (LDAP-Daten hinzufügen - OU psaou) dieses Schema in Kombination mit anderen strukturellen Schemata (inetOrgPerson,posixAccount,shadowAccount) verwenden. Es dient allein zu Organisation der Daten. Das liegt am Eintrag AUXILARY im .schema file. Bei diesem Eintrag gibt es noch mehr Optionen was aber für unsere Zweck nicht notwendig wahr.
-
+---
+layout: intro
 ---
 
 # Einlesen der CSV Datei
@@ -365,11 +371,24 @@ systemctl restart slapd.service
 2. Ausschreiben im richtigen Format in eine `ldif` datei
 3. X.509 Zertifikat hinzufügen
 
-Untersuchen der gegebenen Attribute in der CSV-Datei:
+---
 
-```bash
-head -n 1 testdata/benutzerdaten.csv
-"Name","Vorname","Geschlecht","Geburtsdatum","Geburtsort","Nationalit�t","Stra�e","PLZ","Ort","Telefon","Matrikelnummer"
+## Struktur der CSV Datei
+
+Untersuchen der gegebenen Attribute und Daten in der CSV-Datei mit folgenden Befehl:
+
+```bash{all|1|2|3-11}
+# head -n10 testdata/benutzerdaten.csv
+"Name","Vorname","Geschlecht","Geburtsdatum","Geburtsort","Nationalit�t","Stra�e","PLZ","Ort","Telefon","M...nr"
+Rimmelspacher,Michael,w,10.04.88,Wasserburg,TH,Neufahrner Str. 7,82031,Muenchen,02283-67794984,1574819974
+Seidewitz,Paulo,w,23.02.84,Berlin,DE,Hauptstr. 13 d,81669,Muenchen,03008-89218323,1410829795
+Hegenbartova,Charlotte,m,29.06.85,Muenchen,D,Kirchstr.4,82110,Sauerlach DE,04167/48999010,1533471176
+Brueckner,Sara,m,14.08.84,Muenchen,DE,Semmelweisstr. 7,80805,Muenchen,0792/72430802,1632191735
+Schrammel,Anatol,m,04.05.90,Muenchen,DE,Platanenweg 26,85551,Muenchen,06315/42473821,1948182970
+Traykov,Jan,m,28.07.83,Frankfurt/Main,DE,Stiftsbogen 33,83123,Muenchen DE,0264-52279023,1694982524
+Wang,Nora,m,02.11.84,Koesching,DE,Hohenwaldeckstr. 37,81379,Krumbach DE,07661/47518212,1194390678
+Georgiev,Lukas,m,3.6.79,Dachau,deutsch,Helene-Mayer-Ring 7,80797,Muenchen,09015/84294955,1742634365
+Shulman,Ferdinand,m,03.08.91,Heilbronn,DE,Obertal 27,38527,Muenchen,06119/38253096,1447636373
 ```
 
 ---
@@ -474,34 +493,24 @@ def main():
 ```
 
 ---
+layout: intro
+---
 
-# DAP - Zugriffsrechte
+## DAP - Zugriffsrechte
 
-Laut Aufgabenstellung soll durch einen anonymous bind (Zugriff auf den Server ohne Authentifizierung) lediglich die Benutzerkennung (bei uns uid Attribut) der jeweiligen Einträge angezeigt werden. Dafür müssen die Zugriffsrechte angepasst werden. Der OpenLDAP Server auf Ubuntu wird durch den cn=config tree definiert, also ein eigener Eintrag im LDAP Server. Hier gibt es das Attribut olcAccess was die Zugriffsrechte regelt.
+Anforderung: Ein anonymous bind darf nur die Benutzerkennung erhalten
 
-- Anzeigen der aktuellen Zugriffsrechte mit einer ldapsearch auf das **olcAccess **Attribut:
+---
 
-```bash
+## DAP - Zugriffsrechte
+
+- Der OpenLDAP Server auf Ubuntu wird durch den cn=config tree definiert
+- Anzeigen der aktuellen Zugriffsrechte mit einer ldapsearch auf das **olcAccess** Attribut:
+
+```bash{all|11-14}
 root@vmpsateam09-09:~# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={1}mdb'
 SASL/EXTERNAL authentication started
 SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
-SASL SSF: 0
-
-# extended LDIF
-
-#
-
-# LDAPv3
-
-# base <cn=config> with scope subtree
-
-# filter: olcDatabase={1}mdb
-
-# requesting: ALL
-
-#
-
-# {1}mdb, config
 
 dn: olcDatabase={1}mdb,cn=config
 objectClass: olcDatabaseConfig
@@ -523,23 +532,13 @@ olcDbIndex: uidNumber,gidNumber eq
 olcDbIndex: member,memberUid eq
 olcDbMaxSize: 1073741824
 
-# search result
-
-search: 2
-result: 0 Success
-
-# numResponses: 2
-
-# numEntries: 1
-
 ```
 
-- Die ersten beiden Einträge (olcAccess: {0} + {1}) sind default einträge, die Passwort Authentifizierung regeln. Um nun den anonymous bind einzuschränken haben wir die anderen beiden Regeln angelegt
-  ** olcAccess: {2} -> Regelt den Zugriff auf die Benutzerkennung(uid) und gibt diese der Gruppe anonymous frei. Es steht noch bei attributes der Eintrag entry dabei. Bei diesem handelt es sich um ein Pseudonym Attribut was beim read Zugriff auf alle Attribute gebrauucht wird. Wichtig ist zuletzt das alle anderen Accessgruppen (\*) noch aus dieser Regel break dürfen, da beim LDAP Access sobald eine Regel gematcht wird nicht automatisch die anderen Regeln abgeglichen werden.
-  ** olcAccess: {3} -> Regelt dann den Zugriff auf alle anderen Einträge in der LDAP Datenbank(\*). Wobei der anonymous ausdrücklich keine Zugang mehr hat und die Gruppe users (authentifizierte binds) alles lesen darf
-- Diese regeln werden wie alle Einträge im LDAP Server mittels einer ldif Datei angepasst:
+---
 
-```bash
+-Erzeugen einer ldif Datei um Zugriffsrechte anzupassen
+
+```bash{all|2,3}
 dn: olcDatabase={1}mdb,cn=config
 changetype: modify
 replace: olcAccess
@@ -563,31 +562,40 @@ by \* none
   by users read
 ```
 
+---
+
 - Diese ldif Datei kann mittels folgendem Befehl eingespielt werden:
 
 ```bash
 ldapmodify -H ldapi:/// -f access.ldif -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -W
 ```
 
-- Zum testen kann man dann auf einer Nutzer VM folgenden Befehl ausführen welcher über einen anonymous bind einen Such abfrage startet und man sollte nur noch die uid finden egal welcehn filter man verwendet:
+- Testen
 
 ```bash
 ldapsearch -x -h vm09.psa-team09.in.tum.de -b dc=team09,dc=psa,dc=in,dc=tum,dc=de "(uid=\*)"
 ```
 
-- Konsequenzen: Der Default Weg über den der sssd Service die authentifizierung über den LDAP Server abwickelt ist ein anonymous bind. Wir haben das so geregelt dass jede Nutzer VM einen eigenen Account im LDAP Server in der OU computers erhält und diser dann im sssd Service eingtragen wird (siehe SSSD)
+- Konsequenzen: Eigene VM Benutzer Accounts
+
+---
+layout: intro
+---
+
+# Erzeugen eines X.509 Zertifikats
 
 ---
 
-# Erzeugen eines X.509 Zertifikats/ Hinzufügen zu LDAP-Einträgen
-
 TODO
+
 ```bash
 usercertificate;binary:< file:///root/workspace/csv2ldif/testdata/outcert.der
 ```
 
 ---
+# LDAP - Hinzufügen aller ldif Datein
 
+---
 # SSSD - Installation/Konfiguration
 
 Der System Security Services Daemon ist eine Sammlung von Diensten, die zur Authentifizierung und Sicherheit dienen. In unserem Fall übernimmt der sssd die Authentifizierung durch unseren LDAP Server.
@@ -605,46 +613,44 @@ Bei dieser Installation werden folgende wichtige Dateien angepasst damit der sss
 /etc/nswitch.conf
 ```
 
-```bash
+```bash{all|6,7|8,9|10-14}
 [sssd]
 config_file_version = 2
 domains = psa-team09.in.tum.de
 
 [domain/psa-team09.in.tum.de]
-id_provider = ldap # use LDAP for id resolution
-auth_provider = ldap # use LDAP for authentification
-ldap_uri = ldap://vmpsateam09-09.psa-team09.in.tum.de # verbindung zum ldap-server
+id_provider = ldap                                      # use LDAP for id resolution
+auth_provider = ldap                                    # use LDAP for authentification
+ldap_uri = ldap://vmpsateam09-09.psa-team09.in.tum.de   # verbindung zum ldap-server
 cache_credentials = True
-ldap_search_base = dc=team09,dc=psa,dc=in,dc=tum,dc=de # base domain des ldap-servers
-ldap_id_use_start_tls = true # use TLS connection
-ldap_default_bind_dn = cn=vm05,ou=computers,dc=team09,dc=psa,dc=in,dc=tum,dc=de # account für bind an den ldap server
-ldap_default_authtok_type = password # art der authentifikation am ldap-server
-ldap_default_authtok = XXXXXXXXX # passwort für ldap-server account
+ldap_search_base = dc=team09,dc=psa,dc=in,dc=tum,dc=de  # base domain des ldap-servers
+ldap_id_use_start_tls = true                            # use TLS connection
+ldap_default_bind_dn = cn=vm05,ou=computers,dc=team09,dc=psa,dc=in,dc=tum,dc=de   # account für bind an den ldap server
+ldap_default_authtok_type = password                    # art der authentifikation am ldap-server
+ldap_default_authtok = XXXXXXXXX                        # passwort für ldap-server account
 ldap_tls_reqcert = allow
 ```
 
-Hier werden die Art der Authentifizierung (ldap) und die Account Daten des jeweiligen ldap Accounts für die entsprechende VM angegeben außerdem, dass wir über TLS kommunizieren wollen. Man kann die ganzen Abfragen auch über einen anonymous bind zum LDAP Server machen aber das würde dann der Aufgabenstellung widersprechen in der ein anonymous bind nur die uid anzeigen lassen soll (Mehr dazu in #Zugriffsrechte)
-
-Starten des sssd Services:
+- Starten des sssd Services:
 
 ```bash
 sudo systemctl start sssd.service
 ```
 
-Aktivieren der automatischen Erzeugung von home directorys - nutzen des im LDAP server hinterlegten home Verzeichnis-Pfad:
+- Aktivieren der automatischen Erzeugung von home directorys - nutzen des im LDAP server hinterlegten home Verzeichnis-Pfad:
 
 ```bash
 sudo pam-auth-update --enable mkhomedir
 ```
 
-Dann sollte man die Verbindung zum LDAP-Server noch testen. Mit folgenden Befehl kann man einen anonymous bind (bind ohne Nutzer Kennung) ausführen und bekommt anonymous zurück:
+- Testen
 
 ```bash
 root@vmpsateam09-04:~# ldapwhoami -x -ZZ -h vmpsateam09-09.psa-team09.in.tum.de
 anonymous
 ```
 
-Der letzte Schritt ist dann das löschen der lokalen Nutzern aus den Dateien damit nur noch Daten aus dem LDAP Server genutzt werden:
+- LÖschen der lokalen Nutzer Einträge
 
 ```bash
 userdel nutzerkennung # ohne löschen des homeverzeichnisses
@@ -655,7 +661,7 @@ userdel nutzerkennung # ohne löschen des homeverzeichnisses
 #/etc/shadow
 ```
 
-Zum Überprüfen eignen sich folgende Befehle:
+- Testen
 
 ```bash
 id -a userkennung
@@ -667,4 +673,14 @@ passwd # als user
 
 # Anmerkungen
 
-TODO - sss cache + slapd debug
+- slpad debug
+```bash
+debug kurz: /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 256
+debug lang : /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 1023
+```
+
+-sssd Cache leeren
+```bash
+sss_cache -E 
+systemctl restart sssd.service
+```
