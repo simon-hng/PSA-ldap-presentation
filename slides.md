@@ -537,8 +537,6 @@ olcRootPW: {SSHA}Fm+IDJ3HPqNC6Rwzo5fxguYiP3B8FtiE
 ```
 
 ---
-## LDAP - Zugriffsrechte
-- Erzeugen einer ldif Datei um Zugriffsrechte anzupassen
 
 ## LDAP - Zugriffsrechte
 
@@ -734,6 +732,7 @@ ldap_default_authtok = XXXXXXXXX                        # passwort für ldap-ser
 ldap_tls_reqcert = allow
 ```
 --- 
+
 ## SSSD - Installation/Konfiguration
 
 - Starten des sssd Services:
