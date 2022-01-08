@@ -17,7 +17,7 @@ LDAP
 layout: intro
 ---
 
-# Installation
+# LDAP - Installation
 
 Grundlegende Installation des default ldap servers für Ubuntu: slapd
 
@@ -25,19 +25,53 @@ Grundlegende Installation des default ldap servers für Ubuntu: slapd
 sudo apt install slapd ldap-utils
 ```
 
-Mittels des folgenden Befehls kann man dann seine Base Domäne/ Präfix für den DIT (Directory Information Tree) über eine rudimentäre UI eingeben und ein admin Passwort festlegen (hier bei uns PWD: admin123)
+Grundlegende Konfiguration
 
 ```bash
 sudo dpkg-reconfigure slapd
 ```
+
+Festlegen des Directory Information Tree (DIT)
+
+```bash
+dc=team09,dc=psa,dc=in,dc=tum,dc=de
+```
+---
+
+# LDAP - Daten hinzufügen
+
+Befehle
+
+```bash
+ldapadd -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f file.ldif -W
+ldapmodify -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f file.ldif -W
+```
+**ldif** Format
+
+```bash{all|1|2-4|5-13}
+dn: uid=ge49vaz,ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: inetOrgPerson
+cn: Simon
+sn: Heinrich
+uid: ge49vaz
+uidNumber: 1092
+gidNumber: 1090
+homeDirectory: /home/ge49vaz
+loginShell: /bin/bash
+gecos: Simon Heinrich
+userPassword: XXXXXXX
+```
+---
+
+# LDAP - TLS
 
 Für TLS nutzen wir das certtools für linux
 
 ```bash
 sudo apt install gnutls-bin ssl-cert
 ```
-
----
 
 Erstellen einer Template Datei für die CA unter `/etc/ssl/ca.info/` mit folgendem Inhalt:
 
@@ -48,7 +82,7 @@ cert_signing_key
 expiration_days = 3650
 ```
 
-Dann erzeugen des selbstsignierten CA Zertifikat mithilfe des certtools:
+Selbstsignierten CA Zertifikat erzeugen:
 
 ```bash
 sudo certtool --generate-self-signed \
@@ -57,13 +91,17 @@ sudo certtool --generate-self-signed \
 --outfile /usr/local/share/ca-certificates/mycacert.crt
 ```
 
-Zum Abschluss führt man noch folgenden Befehl aus der das neue CA Zertifikat zur Liste an vertrauenswürdigen CAs hinzuzufügen:
+CA Zertifikat zur Liste an vertrauenswürdigen CAs hinzuzufügen:
 
 ```bash
 update-ca-certificates
 ```
 
-Um dem LDAP Server noch mitzuteilen das neu erzeugte Zertifikat zu nutzen muss man der config Datenbank folgende .ldif Datei zum verarbeiten geben:
+---
+
+# LDAP - TLS
+
+Ein certinfo.ldif Datei erzeugen
 
 ```bash
 dn: cn=config
@@ -77,7 +115,7 @@ olcTLSCACertificateFile: /etc/ssl/certs/mycacert.pem
 
 ```
 
-Anschließend wird dieses File mittels folgenden `ldapmodify` Befehl in den LDAP Server eingespeist:
+Mit `ldapmodify` den LDAP Server anpassen
 
 ```bash
 sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f certinfo.ldif
@@ -87,34 +125,14 @@ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f certinfo.ldif
 
 ## Testen
 
-Zum testen der TLS Verbindung kann man dann folgenden Befehl mit dessen Output betrachten:
 
 ```bash
 root@vmpsateam09-05:~# openssl s_client -connect 192.168.9.9:389 -starttls ldap
-CONNECTED(00000003)
-Cant use SSL_get_servername
-depth=1 CN = PSA TUM
-verify return:1
-depth=0 CN = vmpsateam09-09.psa-team09.in.tum.de, O = PSA TUM
-verify return:1
-
----
-
-
-Certificate chain
-0 s:CN = vmpsateam09-09.psa-team09.in.tum.de, O = PSA TUM
-i:CN = PSA TUM
-1 s:CN = PSA TUM
-i:CN = PSA TUM
 ```
 
----
+Teil des Outputs
 
-## Testen
-
-output ff.
-
-```bash {all|21,10}
+```bash {8,9,20}
 No client certificate CA names sent
 Peer signing digest: SHA256
 Peer signature type: RSA-PSS
@@ -138,35 +156,23 @@ Verify return code: 0 (ok)
 ```
 
 ---
-
-## Daten hinzufügen
-
-Um Dateneinträge unserem LDAP Server hinzuzufügen bzw. diese zu ändern werden folgende Befehle benötigt,
-welche wir alle aus einem sogenannten ldif File lesen:
-
-```bash
-ldapadd -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f file.ldif -W
-ldapmodify -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f file.ldif -W
-```
-
----
 layout: intro
 ---
 
-# Object Units
-TODO: Kurze erklärung evtl.
+# Organizational Units
+Organizational Units (OU) dienen der Strukturierung der LDAP Dateneinträgen
 
 ---
 
 ## OU allgemein anlegen
 
-Object Units allgemein anlegen
+Organizational Units allgemein anlegen
 
-```bash {all|6-9|6|7-8|9}
-dn: ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de #distinguished_name eintrag
-objectclass: top #classes with attributes
-objectclass: organizationalUnit #classes with attributes
-ou: users #concrete attribute with value
+```bash {all|1|2-3|4}
+dn: ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de  #distinguished_name eintrag
+objectclass: top                                  #classes with attributes
+objectclass: organizationalUnit                   #classes with attributes
+ou: users                                         #concrete attribute with value
 
 dn: ou=groups,dc=team09,dc=psa,dc=in,dc=tum,dc=de
 objectclass: top
@@ -189,7 +195,7 @@ ou: psaou
 
 ## OU users
 
-Gruppe für alle Nutzerkennungen der Mitglieder des Praktikums.
+OU für alle Nutzerkennungen der Mitglieder des Praktikums
 
 ```bash
 dn: uid=ge49vaz,ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de
@@ -211,20 +217,20 @@ userPassword: XXXXXXX
 
 ## OU groups
 
-Gruppe für alle Groups die mit Teams aus dem Praktikum assoziiert werden.
+OU für Teams aus dem Praktikum 
 
 ```bash
-dn: ou=users,dc=team09,dc=psa,dc=in,dc=tum,dc=de
-objectclass: top
-objectclass: organizationalUnit
-ou: users
+dn: cn=team09,ou=groups,dc=team09,dc=psa,dc=in,dc=tum,dc=de
+objectClass: top
+objectClass: posixGroup
+gidNumber: 1090
 ```
 
 ---
 
 ## OU computers
 
-Gruppe für alle unsere VMs und deren Kennung zur Abfrage von Nutzerkennungen (Grund siehe LDAP-Zugriffsrechte)
+Nutzerkennungen für alle unsere VMs
 
 ```bash
 dn: cn=vm05,ou=computers,dc=team09,dc=psa,dc=in,dc=tum,dc=de
@@ -239,9 +245,9 @@ userPassword: XXXXXXX
 
 ## OU psaou
 
-Gruppe für alle Nutzerkennung die wir aus dem CSV File eingelesen. Hier wird auch unser selbsterzeugtes Schema psaPerson genutzt.
+Nutzerkennung für die Einträge aus dem CSV File
 
-```bash
+```bash{all|2-5|5}
 dn: Matrikelnummer=1622888953,ou=psaou,dc=team09,dc=psa,dc=in,dc=tum,dc=de
 objectClass: posixAccount
 objectClass: shadowAccount
@@ -261,7 +267,7 @@ homeDirectory: /home/Attenberger
 
 Gruppe für alle Nutzerkennung die wir aus dem CSV File eingelesen. Hier wird auch unser selbsterzeugtes Schema psaPerson genutzt.
 
-```bash{all|1|2-11}
+```bash{all|1|2-12}
 usercertificate;binary:<file:///root/workspace/csv2ldif/testdata/public/1622888953.der
 Nachname: Attenberger
 Vorname: Clarissa
@@ -290,12 +296,12 @@ layout: intro
 
 ## LDAP Schema
 
-Als erstes legt man eine `new.schema` Datei an, die eine spezielle Syntax hat und in unserem Fall wie folgt aufgebaut ist:
+Erzeugen einer `new.schema` Datei an
 
-```bash
-objectidentifier psaSchema 1.3.6.1.4.1.A.B # Unique ObjectIdentifier OID for the scheme --> A and B arbitary numbers for unique idntification
-objectidentifier psaAttrs psaSchema:X # OID for all Attributes --> OID from scheme + ".X"
-objectidentifier psaOCs psaSchema:Y # OID for all ObjectClass definitions --> OID from scheme + ".Y"
+```bash{all|1-3|5-7|8,9|10}
+objectidentifier psaSchema 1.3.6.1.4.1.A.B  # Unique ObjectIdentifier OID for the scheme --> A and B arbitary numbers for unique idntification
+objectidentifier psaAttrs psaSchema:X       # OID for all Attributes --> OID from scheme + ".X"
+objectidentifier psaOCs psaSchema:Y         # OID for all ObjectClass definitions --> OID from scheme + ".Y"
 
 attributetype ( psaAttrs:1                  # new attributetype with OID psaAttrs + ".1"
 NAME 'Nachname'                             # new name for the attributetype
@@ -310,7 +316,9 @@ SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{32} )  # attribute Type: String{field with 
 
 ## LDAP Schema
 
-```bash{all|15|18,19}
+Erzeugen einer `new.schema` Datei an
+
+```bash{all|15-17|19-21}
 attributetype ( psaAttrs:2
 NAME 'Vorname'
 DESC 'PSA Vorname Identifier'
@@ -496,18 +504,18 @@ def main():
 layout: intro
 ---
 
-## DAP - Zugriffsrechte
-
+# LDAP - Zugriffsrechte
 Anforderung: Ein anonymous bind darf nur die Benutzerkennung erhalten
 
 ---
 
-## DAP - Zugriffsrechte
+## LDAP - Zugriffsrechte
 
+- Anforderung: Ein anonymous bind darf nur die Benutzerkennung erhalten
 - Der OpenLDAP Server auf Ubuntu wird durch den cn=config tree definiert
 - Anzeigen der aktuellen Zugriffsrechte mit einer ldapsearch auf das **olcAccess** Attribut:
 
-```bash{all|11-14}
+```bash{all|1|11-14}
 root@vmpsateam09-09:~# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={1}mdb'
 SASL/EXTERNAL authentication started
 SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
@@ -525,20 +533,16 @@ olcAccess: {3}to \* by self write by anonymous none by users read
 olcLastMod: TRUE
 olcRootDN: cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de
 olcRootPW: {SSHA}Fm+IDJ3HPqNC6Rwzo5fxguYiP3B8FtiE
-olcDbCheckpoint: 512 30
-olcDbIndex: objectClass eq
-olcDbIndex: cn,uid eq
-olcDbIndex: uidNumber,gidNumber eq
-olcDbIndex: member,memberUid eq
-olcDbMaxSize: 1073741824
 
 ```
 
 ---
 
--Erzeugen einer ldif Datei um Zugriffsrechte anzupassen
+## LDAP - Zugriffsrechte
 
-```bash{all|2,3}
+- Erzeugen einer ldif Datei um Zugriffsrechte anzupassen
+
+```bash{all|2,3|all}
 dn: olcDatabase={1}mdb,cn=config
 changetype: modify
 replace: olcAccess
@@ -564,16 +568,18 @@ by \* none
 
 ---
 
+## LDAP - Zugriffsrechte
+
 - Diese ldif Datei kann mittels folgendem Befehl eingespielt werden:
 
 ```bash
-ldapmodify -H ldapi:/// -f access.ldif -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -W
+  ldapmodify -H ldapi:/// -f access.ldif -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -W
 ```
 
 - Testen
 
 ```bash
-ldapsearch -x -h vm09.psa-team09.in.tum.de -b dc=team09,dc=psa,dc=in,dc=tum,dc=de "(uid=\*)"
+  ldapsearch -x -h vm09.psa-team09.in.tum.de -b dc=team09,dc=psa,dc=in,dc=tum,dc=de "(uid=\*)"
 ```
 
 - Konsequenzen: Eigene VM Benutzer Accounts
@@ -586,32 +592,127 @@ layout: intro
 
 ---
 
-TODO
+## Erzeugen eines X.509 Zertifikats
+
+Generieren
+```bash
+openssl genrsa 2048 > private.key
+openssl req -new -x509 -nodes -sha1 -days 1000 -key private.key > output.cer
+```
+Konvertieren
 
 ```bash
-usercertificate;binary:< file:///root/workspace/csv2ldif/testdata/outcert.der
+openssl x509 -outform DER -in output.cer -out binary.der
 ```
+ldif Syntax
+
+```bash
+usercertificate;binary:< file:///$PATH_TO_BINARY_FILE$/outcert.der
+```
+---
+layout: intro
+---
+
+# LDAP - Hinzufügen aller ldif Dateien
+Zusammenführung der einzelnen Schritte
+1. Erzeugen eines X.509 Zertifikat in binary Form für jede Kennung
+2. Erzeugen der einzelnen ldif Dateien für jede Kennung
+3. Hinzufügen zum LDAP-Server
 
 ---
-# LDAP - Hinzufügen aller ldif Datein
 
+## LDAP - Hinzufügen aller ldif Dateien
+Bash Skript **addCSVtoLDAP.sh**
+
+```bash
+BASE_DIR=/root/workspace/csv2ldif
+INPUT_DIR=$BASE_DIR/testdata
+CSV_INPUT=$INPUT_DIR/benutzerdaten.csv2
+BIN_DIR=$INPUT_DIR/public
+KEY_DIR=$INPUT_DIR/private
+PWD_FILE=$BASE_DIR/.pw
+
+echo Cleanup
+
+/bin/rm -f $BIN_DIR/*.der
+/bin/rm -f $BIN_DIR/*.cer
+/bin/rm -f $INPUT_DIR/input.*
+/bin/rm -f $KEY_DIR/*.key
+/bin/rm -f $BASE_DIR/ldap_data/*.ldif
+```
+--- 
+
+## LDAP - Hinzufügen aller ldif Dateien
+Bash Skript **addCSVtoLDAP.sh**
+
+```bash{all|6|8|9}
+echo Create Certifcates
+
+cd $INPUT_DIR
+export IFS=,; cat $CSV_INPUT |  while read na vn x1 x2 x3 co x5 x6 ci x7 x8; do 
+   [ $co == "D" ] && co=DE; 
+   openssl genrsa 2048 > $KEY_DIR/$x8.key  
+   printf "%s\n-\n%s\n-\n-\n%s %s\n%s.%s@web.de\n"  "DE" "$ci" "$vn" "$na" "$vn" "$na" > $INPUT_DIR/input.$x8; 
+   cat input.$x8 |  openssl req -new -x509 -nodes -sha1 -days 1000 -key $KEY_DIR/$x8.key > $BIN_DIR/$x8.cer; 
+   openssl x509 -outform DER -in $BIN_DIR/$x8.cer -out $BIN_DIR/$x8.der ;
+done
+```
+--- 
+
+## LDAP - Hinzufügen aller ldif Dateien
+Bash Skript **addCSVtoLDAP.sh**
+
+```bash
+echo Create ldifs
+
+cd $BASE_DIR
+./csv2ldif
+```
+--- 
+
+## LDAP - Hinzufügen aller ldif Dateien
+Bash Skript **addCSVtoLDAP.sh**
+
+```bash{all|6}
+echo Import ldifs
+
+cd $BASE_DIR/ldap_data
+for i in *.ldif; do 
+  echo -n "-- add $i "
+  ldapadd -x -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -f $i -y $PWD_FILE > /dev/null 2>&1
+  ret=$?
+  [ $ret -eq 0 ] && echo "ok"
+  [ $ret -ne 0 ] && echo "error (ret=$ret)"
+done
+```
 ---
+layout: intro
+---
+
 # SSSD - Installation/Konfiguration
 
-Der System Security Services Daemon ist eine Sammlung von Diensten, die zur Authentifizierung und Sicherheit dienen. In unserem Fall übernimmt der sssd die Authentifizierung durch unseren LDAP Server.
+Der System Security Services Daemon ist eine Sammlung von Diensten, die zur Authentifizierung und Sicherheit dienen.
 
-Installation:
+---
+
+## SSSD - Installation/Konfiguration
 
 ```bash
 sudo apt install sssd-ldap ldap-utils
 ```
 
-Bei dieser Installation werden folgende wichtige Dateien angepasst damit der sssd Service bei der Authentifizierung eines Nutzers auch befragt wird TODO bsp pam_sss:
+Änderungen bei der Installation
 
 ```bash
 /etc/pam.d/\*
 /etc/nswitch.conf
 ```
+
+---
+
+## SSSD - Installation/Konfiguration
+
+Anlegen einer `/etc/sssd/sssd.conf`
 
 ```bash{all|6,7|8,9|10-14}
 [sssd]
@@ -630,6 +731,9 @@ ldap_default_authtok_type = password                    # art der authentifikati
 ldap_default_authtok = XXXXXXXXX                        # passwort für ldap-server account
 ldap_tls_reqcert = allow
 ```
+--- 
+
+## SSSD - Installation/Konfiguration
 
 - Starten des sssd Services:
 
@@ -649,8 +753,10 @@ sudo pam-auth-update --enable mkhomedir
 root@vmpsateam09-04:~# ldapwhoami -x -ZZ -h vmpsateam09-09.psa-team09.in.tum.de
 anonymous
 ```
+---
 
-- LÖschen der lokalen Nutzer Einträge
+## SSSD - Installation/Konfiguration
+- Löschen der lokalen Nutzer Einträge
 
 ```bash
 userdel nutzerkennung # ohne löschen des homeverzeichnisses
@@ -679,7 +785,7 @@ debug kurz: /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /
 debug lang : /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 1023
 ```
 
--sssd Cache leeren
+- sssd Cache leeren
 ```bash
 sss_cache -E 
 systemctl restart sssd.service
