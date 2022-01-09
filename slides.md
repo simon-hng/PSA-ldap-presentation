@@ -17,6 +17,15 @@ LDAP
 layout: intro
 ---
 
+# LDAP - Abkürzungen
+- CN = Common Name
+- OU = Organizational Unit
+- DC = Domain Component
+
+---
+layout: intro
+---
+
 # LDAP - Installation
 
 Grundlegende Installation des default ldap servers für Ubuntu: slapd
@@ -526,10 +535,10 @@ objectClass: olcMdbConfig
 olcDatabase: {1}mdb
 olcDbDirectory: /var/lib/ldap
 olcSuffix: dc=team09,dc=psa,dc=in,dc=tum,dc=de
-olcAccess: {0}to attrs=userPassword by self write by anonymous auth by _ none
+olcAccess: {0}to attrs=userPassword by self write by anonymous auth by * none
 olcAccess: {1}to attrs=shadowLastChange by self write by users read
-olcAccess: {2}to attrs=uid,entry by anonymous read by _ break
-olcAccess: {3}to \* by self write by anonymous none by users read
+olcAccess: {2}to attrs=uid,entry by anonymous read by * break
+olcAccess: {3}to * by self write by anonymous none by users read
 olcLastMod: TRUE
 olcRootDN: cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de
 olcRootPW: {SSHA}Fm+IDJ3HPqNC6Rwzo5fxguYiP3B8FtiE
@@ -549,7 +558,7 @@ replace: olcAccess
 olcAccess: {0}to attrs=userPassword
 by self write
 by anonymous auth
-by \* none
+by * none
 
 - add: olcAccess
   olcAccess: {1}to attrs=shadowLastChange
@@ -558,9 +567,9 @@ by \* none
 - add: olcAccess
   olcAccess: {2}to attrs=uid,entry
   by anonymous read
-  by \* break
+  by * break
 - add: olcAccess
-  olcAccess: {3}to \*
+  olcAccess: {3}to *
   by self write
   by anonymous none
   by users read
@@ -609,6 +618,38 @@ ldif Syntax
 ```bash
 usercertificate;binary:< file:///$PATH_TO_BINARY_FILE$/outcert.der
 ```
+
+--- 
+
+## Erzeugen eines X.509 Zertifikats
+
+Testen
+
+```bash
+root@vmpsateam09-05:~# ldapsearch -x -h 192.168.9.9 -b dc=team09,dc=psa,dc=in,dc=tum,dc=de \
+ -D "cn=admin,dc=team09,dc=psa,dc=in,dc=tum,dc=de" -W \
+ "(Matrikelnummer=1813607693)" userCertificate
+Enter LDAP Password:
+# extended LDIF
+# LDAPv3
+# base <dc=team09,dc=psa,dc=in,dc=tum,dc=de> with scope subtree
+# filter: (Matrikelnummer=1813607693)
+# requesting: userCertificate
+# 1813607693, psaou, team09.psa.in.tum.de
+dn: Matrikelnummer=1813607693,ou=psaou,dc=team09,dc=psa,dc=in,dc=tum,dc=de
+userCertificate;binary:: MIID5TCCAs2gAwIBAgIUd5HM011N05eAf/WxRUJNQrw+sFIwDQYJK
+ oZIhvcNAQEFBQAwgYExCzAJBgNVBAYTAkRFMQowCAYDVQQIDAEtMQ8wDQYDVQQHDAZUZXJsYW4xCj
+ ...
+ Pu9yOpe+ogRhIMEwngzAXipGjyEyUJfLvp3E86knMNjr/xCXqKU/XEdbv8xbPtfWHmgHWIgToTPBl
+ 5G1uOnK7EMDiYfMuUS+oKw4+kPCVAYEhALTcOarNkFyjB7qamw=
+
+# search result
+search: 2
+result: 0 Success
+# numResponses: 2
+# numEntries: 1
+```
+
 ---
 layout: intro
 ---
@@ -704,8 +745,18 @@ sudo apt install sssd-ldap ldap-utils
 Änderungen bei der Installation
 
 ```bash
-/etc/pam.d/\*
+/etc/pam.d/common-*
 /etc/nswitch.conf
+```
+
+Beispiel `common-auth`
+```bash
+auth    [success=1 default=ignore]      pam_sss.so use_first_pass
+```
+
+Beispiel `nswitch.conf`
+```bash
+passwd:         files systemd sss
 ```
 
 ---
