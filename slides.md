@@ -270,6 +270,8 @@ sn: Attenberger
 homeDirectory: /home/Attenberger
 
 ```
+
+
 ---
 
 ## OU psaou
@@ -619,7 +621,7 @@ ldif Syntax
 usercertificate;binary:< file:///$PATH_TO_BINARY_FILE$/outcert.der
 ```
 
---- 
+---
 
 ## Erzeugen eines X.509 Zertifikats
 
@@ -681,7 +683,7 @@ echo Cleanup
 /bin/rm -f $KEY_DIR/*.key
 /bin/rm -f $BASE_DIR/ldap_data/*.ldif
 ```
---- 
+---
 
 ## LDAP - Hinzufügen aller ldif Dateien
 Bash Skript **addCSVtoLDAP.sh**
@@ -698,7 +700,7 @@ export IFS=,; cat $CSV_INPUT |  while read na vn x1 x2 x3 co x5 x6 ci x7 x8; do
    openssl x509 -outform DER -in $BIN_DIR/$x8.cer -out $BIN_DIR/$x8.der ;
 done
 ```
---- 
+---
 
 ## LDAP - Hinzufügen aller ldif Dateien
 Bash Skript **addCSVtoLDAP.sh**
@@ -709,7 +711,7 @@ echo Create ldifs
 cd $BASE_DIR
 ./csv2ldif
 ```
---- 
+---
 
 ## LDAP - Hinzufügen aller ldif Dateien
 Bash Skript **addCSVtoLDAP.sh**
@@ -782,7 +784,7 @@ ldap_default_authtok_type = password                    # art der authentifikati
 ldap_default_authtok = XXXXXXXXX                        # passwort für ldap-server account
 ldap_tls_reqcert = allow
 ```
---- 
+---
 
 ## SSSD - Installation/Konfiguration
 
@@ -830,10 +832,10 @@ passwd # als user
 
 # Anmerkungen
 
-- slpad debug
+- slapd debug
 ```bash
-debug kurz: /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 256
-debug lang : /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 1023
+debug kurz: slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 256
+debug lang : slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F /etc/ldap/slapd.d -d 1023
 ```
 
 - sssd Cache leeren
@@ -841,3 +843,14 @@ debug lang : /usr/sbin/slapd -h "ldap:/// ldapi:///" -g openldap -u openldap -F 
 sss_cache -E 
 systemctl restart sssd.service
 ```
+
+---
+layout: intro
+---
+
+# Fragen?
+
+---
+
+# Quellen
+
