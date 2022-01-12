@@ -590,7 +590,7 @@ by * none
 - Testen
 
 ```bash
-  ldapsearch -x -h vm09.psa-team09.in.tum.de -b dc=team09,dc=psa,dc=in,dc=tum,dc=de "(uid=\*)"
+  ldapsearch -x -h vm09.psa-team09.in.tum.de -b dc=team09,dc=psa,dc=in,dc=tum,dc=de "(uid=*)"
 ```
 
 - Konsequenzen: Eigene VM Benutzer Accounts
@@ -788,6 +788,11 @@ ldap_tls_reqcert = allow
 
 ## SSSD - Installation/Konfiguration
 
+- Zugriffsrechte anpassen:
+
+```bash
+sudo chmod 0600 sssd.conf
+```
 - Starten des sssd Services:
 
 ```bash
